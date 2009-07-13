@@ -1,0 +1,27 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ko">
+<head>
+  <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+  <title>Custom Markup Example &mdash; PagedTable</title>
+  <link href="assets/style.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+  <h1>Custom Markup Example</h1>
+  <script src="assets/table.js" type="text/javascript"></script>
+  <script src="assets/jquery-1.3.2.min.js" type="text/javascript"></script>
+  <script src="../pagedtable.js" type="text/javascript"></script>
+  <script type="text/javascript" class="code">
+// <![CDATA[
+$('table:eq(0)').pageable({
+    page: '<strong></strong>',
+    next: '<a href="#">[Next]</a>',
+    prev: '<a href="#">[Prev]</a>'
+});
+// ]]>
+  </script>
+  <script src="assets/viewscript.js" type="text/javascript"></script>
+  <p>See also <a href="http://github.com/heungsub/PagedTable/">PagedTable repository</a>.</p>
+</body>
+</html>
+
