@@ -1,0 +1,24 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ko">
+<head>
+  <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+  <title>Cloned Pager Example &mdash; PagedTable</title>
+  <link href="style.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+  <h1>Cloned Pager Example</h1>
+  <script src="table.js" type="text/javascript"></script>
+  <script src="jquery-1.3.2.min.js" type="text/javascript"></script>
+  <script src="../pagedtable-0.9.1.js" type="text/javascript"></script>
+  <script type="text/javascript" class="code">
+// <![CDATA[
+var pt = $('table:eq(0)').pageable();
+pt.pager().insertBefore(pt.element);
+// ]]>
+  </script>
+  <script src="viewscript.js" type="text/javascript"></script>
+  <p>See also <a href="http://github.com/heungsub/PagedTable/">PagedTable repository</a>.</p>
+</body>
+</html>
+
