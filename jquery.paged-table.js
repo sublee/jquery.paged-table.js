@@ -1,71 +1,18 @@
 /**
- * Copyright (c) 2009 Lee, Heungsub <lee@heungsub.net>
- * 
- * Permission is hereby granted, free of charge, to any person
- * obtaining a copy of this software and associated documentation
- * files (the "Software"), to deal in the Software without
- * restriction, including without limitation the rights to use,
- * copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the
- * Software is furnished to do so, subject to the following
- * conditions:
- * 
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
- * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
- * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
- * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
- * OTHER DEALINGS IN THE SOFTWARE.
- *
- * @module PagedTable 0.9.1 Beta
- * @author Lee, Heungsub <lee@heungsub.net>
- * @description Change table to which has a pager.
- * @link http://heungsub.net/apps/pagedtable
- * @requires jQuery 1.3.x
- * @thanks Choi, Jonghyun <jonghyun@lunant.net>
- */
+    jquery.paged-table.js
+    ~~~~~~~~~~~~~~~~~~~~~
 
-(function($) {
-PagedTable = function(selector, options) {
-    /** Change table to which has a pager.
+    Adds a pager to a <table>.
+*/
 
-    Syntax:
-        new PagedTable(selector[, options]);
+(function( $ ) {
+PagedTable = function( selector, options ) {
+    /** Changes a <table> to which has a pager::
 
-    Arguments:
-        1. selector - (expression) A <table> element to apply PagedTable.
-        2. options - (object, optional) An object with options.
+        var pt = new PagedTable( "table:eq(0)", { limit: 10 });
 
-    Options:
-        * limit - (number: defaults to 5) Rows in each page.
-        * pagelimit - (number: defaults to 10) Pages in each pager.
-        * started - (number: defaults to 1) The default page.
-        * insertpager - (boolean: defaults to true)
-            Insert pager element at initialized if it is true.
-        * dragpager - (boolean: defaults to false)
-            Makes able to drag pagers in table if it is true.
-        * fixedwidth - (boolean: defaults to true)
-            Set width fixed if it is true.
-        * pager - (expression: defaults '<p class="pager"></p>')
-            Pager element expression.
-        * page - (expression: defaults '<a href="#"></a>')
-            Page element expression.
-        * prev - (expression: defaults '<a href="#">&laquo;</a>')
-            Previous page element expression.
-        * next - (expression: defaults '<a href="#">&raquo;</a>')
-            Next page element expression.
-        * selectedclass - (string: defaults 'selected')
-            The class to add a selected page element.
+    The result is::
 
-    Example:
-        var pt = new PagedTable('table');
-
-    Result:
         +----+-------------------------+
         | id |         subject         |
         +----+-------------------------+
@@ -77,67 +24,106 @@ PagedTable = function(selector, options) {
         +----+-------------------------+
          [1] 2 3 4 5 >
 
-    */
-    var defaults = {
-        limit: 5,
-        pagelimit: 10,
-        started: 1,
-        insertpager: true,
-        dragpager: false,
-        fixedwidth: true,
-        pager: '<p class="pager"></p>',
-        page: '<a href="#"></a>',
-        prev: '<a href="#">&laquo;</a>',
-        next: '<a href="#">&raquo;</a>',
-        selectedclass: 'selected'
-    };
-    this.options = $.extend(defaults, options);
-    this.element = $($(selector).get(0));
-    this.initialize();
-}
+    It has some options.
 
-PagedTable.version = '0.9.1';
-PagedTable.updated = '2009-07-10 11:00';
+    limit
+        Rows in each page(default: ``5``)
+    pageLimit
+        Pages in each pager(default: ``10``)
+    started
+        The default page(default: ``1``)
+    insertPager
+        Inserts pager element at initialized if it is true(default: ``true``)
+    dragPager
+        Makes able to drag pagers in table if it is true(default: ``false``)
+    fixedWidth
+        Set width fixed if it is true(default: ``true``)
+    pager
+        The pager element expression(default: ``<p class='pager'></p>``)
+    page
+        The page element expression(default: ``<a href='#'></a>``)
+    prev
+        The previous page element expression(default:
+        ``<a href='#'>&laquo;</a>``)
+    next
+        The next page element expression(default: ``<a href='#'>&raquo;</a>``)
+    selectedClass
+        The class to add a selected page element(default: ``selected``)
+
+    :param selector: A <table> element to apply :class:`PagedTable`.
+    :param options: An object with options.
+    */
+    this.options = $.extend({}, this.options, options );
+    this.element = $( selector ).eq( 0 );
+    this.initialize();
+};
+
+PagedTable.version = "0.10.0";
+PagedTable.updated = "2010-09-03 10:26";
+
+PagedTable.prototype.options = {
+    limit: 5,
+    pageLimit: 10,
+    started: 1,
+    insertPager: true,
+    dragPager: false,
+    fixedWidth: true,
+    pager: "<p class='pager'></p>",
+    page: "<a href='#'></a>",
+    prev: "<a href='#'>&laquo;</a>",
+    next: "<a href='#'>&raquo;</a>",
+    selectedClass: "selected"
+};
 
 PagedTable.prototype.initialize = function() {
     var self = this;
-    this.rows = $('tbody > tr', this.element);
+
+    this.rows = $( "tbody > tr", this.element );
     this.length = this.rows.length;
-    this.pages = Math.ceil(this.length / this.options.limit);
+    this.pages = Math.ceil( this.length / this.options.limit );
     this.pagers = [];
 
-    var divide = function(elements, limit) {
+    var divide = function( elements, limit ) {
         var divided = [];
         elements.each(function(i) {
-            if (i % limit == 0) divided.push([]);
-            divided[divided.length - 1].push(this);
+            if ( i % limit === 0 ) {
+                divided.push([]);
+            }
+            divided[ divided.length - 1 ].push( this );
         });
         return divided;
+    };
+    this.rows.divided = divide( this.rows, this.options.limit );
+
+    if ( this.options.fixedWidth ) {
+        this.element.find( "th" ).each(function() {
+            var th = $( this );
+            th.width( th.width() + 1 );
+        });
     }
-    this.rows.divided = divide(this.rows, this.options.limit);
+    if ( this.options.insertPager ) {
+        this.pager().insertAfter( this.element );
+    }
+    if ( this.options.pageLimit < 0 ) {
+        this.options.pageLimit = this.pages;
+    }
 
-    if (this.options.fixedwidth) $('th', this.element).each(function() {
-        $(this).width($(this).width() + 1);
-    });
-    if (this.options.insertpager) this.pager().insertAfter(this.element);
-    if (this.options.pagelimit < 0) this.options.pagelimit = this.pages;
-
-    return this.goto(this.options.started);
-}
+    return this.goto( this.options.started );
+};
 
 PagedTable.prototype.pager = function() {
-    /** Returns new pager element for table.
+    /** Returns new pager element.
 
-    Syntax:
-        tp.pager();
+        >>> var pager = pt.pager();
+        >>> pager instanceof jQuery;
+        true
 
-    Returns:
-        (jQuery<element>) The jQuery object that contains new pager element.
+    If you want to clone a pager before the table::
 
-    Example:
-        tp.pager().insertBefore(tp.element);
+        pager.insertBefore( tp.element );
 
-    Result:
+    The result is::
+
          [1] 2 3 4 5 >
         +----+-------------------------+
         | id |         subject         |
@@ -149,94 +135,100 @@ PagedTable.prototype.pager = function() {
         |  5 | lee, heungsub           |
         +----+-------------------------+
          [1] 2 3 4 5 >
-
     */
     var pager;
-    if (!this.pagers.length) {
-        var options = this.options;
-        pager = $(options.pager);
-        var self = this;
+    if ( !this.pagers.length ) {
+        var self = this,
+            options = this.options;
 
-        var mousedown = options.dragpager ? function() {
-            PagedTable.dragged = pager;
-        } : null;
+        pager = $( options.pager );
 
-        var click = function() {
-            self.goto($(this).text());
+        var mousedown = options.dragPager ? function() {
+                PagedTable.dragged = pager;
+            } : null, 
+            click = function() {
+                self.goto( $( this ).text() );
+                return false;
+            };
+
+        $( options.prev ).click(function() {
+            var m = Math.ceil( self.page / options.pageLimit ) - 1,
+                i = options.pageLimit * m;
+            self.goto( i );
             return false;
+        }).appendTo( pager );
+
+        for ( var i = 0; i < Math.min( this.pages ); i++ ) {
+            var page = $( options.page );
+            page.text( i + 1 ).click( click );
+            page.mousedown( mousedown ).appendTo( pager );
         }
 
-        $(options.prev).click(function() {
-            var i = options.pagelimit *
-                    (Math.ceil(self.page / options.pagelimit) - 1);
-            self.goto(i);
+        $( options.next ).click(function() {
+            var m = Math.ceil( self.page / options.pageLimit ),
+                i = options.pageLimit * m + 1;
+            self.goto( i );
             return false;
-        }).appendTo(pager);
-        for (var i = 0; i < Math.min(this.pages); ++ i) {
-            var page = $(options.page);
-            page.text(i + 1).click(click).mousedown(mousedown).appendTo(pager);
-        }
-        $(options.next).click(function() {
-            var i = options.pagelimit *
-                    Math.ceil(self.page / options.pagelimit) + 1;
-            self.goto(i);
-            return false;
-        }).appendTo(pager);
+        }).appendTo( pager );
 
-        if (options.dragpager) {
-            var d = function(p1, p2) {
-                return Math.sqrt(Math.pow(p1[0] - p2[0], 2) +
-                                 Math.pow(p1[1] - p2[1], 2));
-            }
-            $($.browser.msie ? document.body : window).mousemove(function(e) {
+        if ( options.dragPager ) {
+            var win = $( $.browser.msie ? document.body : window ),
+                d = function( p1, p2 ) {
+                    var x = Math.pow( p1[0] - p2[0], 2 ),
+                        y = Math.pow( p1[1] - p2[1], 2 );
+                    return Math.sqrt( x + y );
+                };
+            win.mousemove(function( e ) {
                 var dragged = PagedTable.dragged;
-                if (dragged) {
-                    var cursor = [e.pageX, e.pageY];
-                    var range = self._range();
-                    var ds = [];
-                    var pages = [];
-                    var getdistance = function() {
-                        var page = $(this);
-                        var pos = page.position();
-                        var center = [pos.left + page.width() / 2,
-                                      pos.top + page.height() / 2];
-                        var distance = d(cursor, center);
-                        if (ds.length && ds[ds.length - 1] < distance) {
-                            return false;
-                        }
-                        ds.push(distance);
-                        pages.push(page);
-                    }
-                    $(dragged).children().slice(range[0], range[1] + 1)
-                              .each(getdistance);
-                    var i = $.inArray(Math.min.apply(null, ds), ds);
-                    pages[i].click();
+
+                if ( dragged ) {
+                    var cursor = [ e.pageX, e.pageY ],
+                        range = self._range(),
+                        ds = [],
+                        pages = [],
+                        getDistance = function() {
+                            var page = $( this ),
+                                pos = page.position(),
+                                x = pos.left + page.width() / 2,
+                                y = pos.top + page.height() / 2,
+                                center = [ x, y ],
+                                distance = d( cursor, center );
+                            if ( ds.length && ds[ ds.length - 1 ] < distance ) {
+                                return false;
+                            }
+                            ds.push( distance );
+                            pages.push( page );
+                        },
+                        pages = $( dragged ).children();
+
+                    pages = pages.slice( range[0], range[1] + 1 );
+                    pages.each( getDistance );
+
+                    var i = $.inArray( Math.min.apply( null, ds ), ds );
+                    pages.eq( i ).click();
+
                     return false;
                 }
-            }).mouseup(function() { PagedTable.dragged = null; });
+            }).mouseup(function() {
+                PagedTable.dragged = null;
+            });
         }
     } else {
-        pager = this.pagers[0].clone(true);
+        pager = this.pagers[ 0 ].clone( true );
     }
 
-    this.pagers.push(pager);
+    this.pagers.push( pager );
 
     return pager;
-}
+};
 
-PagedTable.prototype.goto = function(page) {
-    /** Go to certain page.
+PagedTable.prototype.goto = function( page ) {
+    /** Goes to certain page::
 
-    Syntax:
-        tp.goto(page);
+        tp.goto( 14 );
 
-    Returns:
-        (PagedTable) This object.
+    The result is::
 
-    Example:
-        tp.goto(14);
-
-    Result:
          < 11 12 13 [14] 15 >
         +----+-------------------------+
         | id |         subject         |
@@ -248,63 +240,97 @@ PagedTable.prototype.goto = function(page) {
         | 70 | Lunant Forever!!        |
         +----+-------------------------+
          < 11 12 13 [14] 15 >
-
     */
-    var self = this;
-    var options = this.options;
+    var self = this,
+        options = this.options;
+        page = page < 1 ? 1 : page > this.pages ? this.pages : page,
+        range = this._range(), newrange = this._range( page ),
+        from = (page - 1) * this.options.limit,
+        to = page * this.options.limit;
 
-    var page = page < 1 ? 1 : page > this.pages ? this.pages : page;
-    var range = this._range(), newrange = this._range(page);
-    var from = (page - 1) * this.options.limit, to = page * this.options.limit;
+    (this._visibleRows || this.rows).hide();
+    this._visibleRows = $( this.rows.divided[ page - 1 ] ).show();
 
-    (this._visiblerows || this.rows).hide();
-    this._visiblerows = $(this.rows.divided[page - 1]).show();
+    $( this.pagers ).each(function() {
+        var selected = options.selectedClass;
+            children = $( this ).children();
+            length = self.length;
 
-    $(this.pagers).each(function() {
-        var selected = options.selectedclass;
-        var children = $(this).children();
-        var length = self.length;
-
-        if (length) {
-            children.slice(1, self.pages + 1).hide();
-            children.slice(range[0], range[1] + 1).removeClass(selected);
-            children.slice(newrange[0], newrange[1] + 1).show();
-            children.eq(page).addClass(selected);
+        if ( length ) {
+            children.slice( 1, self.pages + 1 ).hide();
+            children.slice( range[0], range[1] + 1 ).removeClass( selected );
+            children.slice( newrange[0], newrange[1] + 1 ).show();
+            children.eq( page ).addClass( selected );
         }
 
-        var prev = children.eq(0);
-        var next = children.eq(self.pages + 1);
+        var prev = children.eq( 0 ),
+            next = children.eq( self.pages + 1 );
 
-        if (!length || newrange[0] == 1) prev.hide();
-        else prev.show();
-        if (!length || self.pages <= newrange[1]) next.hide();
-        else next.show();
+        if ( !length || newrange[ 0 ] === 1 ) {
+            prev.hide();
+        } else {
+            prev.show();
+        }
+        if ( !length || self.pages <= newrange[ 1 ] ) {
+            next.hide();
+        } else {
+            next.show();
+        }
     });
+
     this.page = page;
     return this;
-}
+};
 
 PagedTable.prototype.revert = function() {
     var self = this;
-    $(this.pagers).empty();
-    $(this.rows).show();
-    $.each(['pagers', 'page', 'rows', '_visiblerows'], function() {
-        delete self[this];
+    $( this.pagers ).empty();
+    $( this.rows ).show();
+    $.each([ "pagers", "page", "rows", "_visibleRows" ], function() {
+        delete self[ this ];
     });
     return this;
-}
+};
 
-PagedTable.prototype._range = function(page) {
+PagedTable.prototype._range = function( page ) {
     page = page || this.page;
-    var pagelimit = this.options.pagelimit;
-    return [Math.ceil(page / pagelimit - 1) * pagelimit + 1,
-            Math.ceil(page / pagelimit) * pagelimit];
-}
+    var pageLimit = this.options.pageLimit,
+        from = Math.ceil(page / pageLimit - 1) * pageLimit + 1,
+        to = Math.ceil(page / pageLimit) * pageLimit;
+    return [ from, to ];
+};
 
 $.fn.extend({
-    pageable: function(options) {
-        return new PagedTable(this, options);
+    pagedTable: function( options ) {
+        this.data( "pagedTable", new PagedTable( this, options ) );
+        return this;
+    },
+    pageable: function( options ) {
+        var warn = function( msg ) {
+            return console && console.warn && console.warn( msg );
+        }, msg;
+        
+        msg = "`$.fn.pageable` is deprecated on version 0.10.0. ";
+        msg += "Use `$.fn.pagedTable` instead of this.";
+        warn( msg );
+
+        if ( options ) {
+            for ( var opt in PagedTable.prototype.options ) {
+                var lowerOpt = opt.toLowerCase();
+                if ( opt !== lowerOpt && lowerOpt in options ) {
+                    msg = "`" + lowerOpt + "` option is deprecated on ";
+                    msg += "version 0.10.0. Use `" + opt + "` instead of "
+                    msg += "this.";
+                    warn( msg );
+
+                    options[ opt ] = options[ lowerOpt ];
+                }
+            }
+        }
+
+        return this.pagedTable( options ).data( "pagedTable" );
     }
 });
+
 })(jQuery);
 
